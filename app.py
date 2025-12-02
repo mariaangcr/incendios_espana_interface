@@ -4,8 +4,30 @@ st.set_page_config(
     page_icon="🔥",
     layout="wide"
 )
-# 2. Funcion de carga de datos
-df = pd.read_csv('fires-all.csv', parse_dates=['fecha'], index_col='fecha')
+# 2. Carga de datos optimizada (memoria y cache)
+@st.cache_data
+def cargar_datos():
+    archivo_zip = 'fires-all.csv.zip'
+    
+    try:
+        with zipfile.ZipFile(archivo_zip) as z:
+            # Truco para evitar la carpeta __MACOSX oculta
+            nombre_csv = [f for f in z.namelist() if f.endswith('.csv') and '__MACOSX' not in f][0]
+            
+            with z.open(nombre_csv) as f:
+                df = pd.read_csv(f, usecols=cols, parse_dates=['fecha'], index_col='fecha')
+        
+    except Exception as e:
+        st.error(f"Error cargando datos: {e}")
+        return pd.DataFrame() # Devuelve vacío si falla
+
+# Cargamos los datos
+df = cargar_datos()
+
+# Si no hay datos, paramos aquí
+if df.empty:
+    st.stop()
+
 # 3. Barra lateral filtros 
 st.sidebar.header("Filtros de Búsqueda")
 
