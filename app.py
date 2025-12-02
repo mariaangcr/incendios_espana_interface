@@ -21,7 +21,7 @@ def cargar_datos():
             nombre_csv = [f for f in z.namelist() if f.endswith('.csv') and '__MACOSX' not in f][0]
             
             with z.open(nombre_csv) as f:
-                df = pd.read_csv(f, usecols=cols, parse_dates=['fecha'], index_col='fecha')
+                df = pd.read_csv(f, parse_dates=['fecha'], index_col='fecha')
         
     except Exception as e:
         st.error(f"Error cargando datos: {e}")
